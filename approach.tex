@@ -1,0 +1,36 @@
+\chapter{アプローチ}
+\label{approach}
+本論文では，量子鍵配送で共有された乱数を，IKEv2によって
+管理してIPsecの暗号化鍵に用いることを目的とする．
+\section{新構造と前提}
+本研究に於けるネットワークは図\ref{wholenetwork}
+のように構成される．
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=400pt]{figure/nullpo.jpg}
+\label{wholenetwork}
+\caption{IPsec with QKD ネットワーク図}
+\end{center}
+\end{figure}
+
+まず，両サイドにそれぞれ一つずつIPsec Gatewayと量子鍵配送装置
+IPsec GatewayはIPネットワークを通じて逆サイドのIPsec Gatewayと繋がっている. 
+また，量子鍵配送装置は量子ネットワークを通して逆サイドの量子鍵配送装置と
+繋がっている．両サイドに於いて，IPsec gatewayと量子鍵配送装置は
+ローカル接続されている．この接続は確実に安全でなければならず，
+つまりは認証されておりなおかつ送受信に於いて信頼性が確認されておらねばならない．
+この接続は物理的には専用線が望ましい．
+\\
+\indent
+量子鍵配送装置は，共有した秘密乱数をIPsec Gatewayに供給する．
+本研究においては，本ネットワーク中に存在する量子鍵配送装置で
+共有される秘密乱数は全て本ネットワーク中のIPsec Gatewayで利用
+されることとする．
+
+\section{IKE拡張モデルに対する要求事項}
+
+\section{量子鍵配送を用いるための拡張切り分け}
+
+\indent
+ほげ

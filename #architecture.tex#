@@ -1,0 +1,213 @@
+\chapter{ネットワークストリーミング管理制御機構の設計}
+\label{architecture}
+\indent
+本章では，\ref{approach}章で述べた目的を達成するために必要な設計を行う．
+
+\section{設計要件}
+\label{architecture:requirement}
+\indent
+必要になる要件と，それを満たすための機能を以下にまとめる．
+
+\begin{itemize}
+\item Clientによる，Managerの自動探索
+\item Manager間の情報共有および同期
+\item Managerの情報の閲覧，および，操作のインターフェイス
+\item ManagerからClientの制御
+\end{itemize}
+
+\section{設計概要}
+\label{architecture:overview}
+\indent
+本節では，前節の要件と機能を実装するために行った設計の概要を述べる．
+図\ref{fig:model}に設計の概略図を示す．
+本実装は，大きく分けてサービス解決，情報共有，操作と制御の3パートに分けられる．
+以下で，各パートの詳細を述べる．
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=400pt]{figure/model.eps}
+\caption{システムモデル}
+\label{fig:model}
+\end{center}
+\end{figure}
+
+\section{Clientのサービス解決}
+\label{architecture:service_resolution}
+\indent
+ClientによるManagerのサービス解決は自動で行われる必要がある．
+そのために必要な通信の手順を以下で定義する．
+
+\subsection{サービス解決概要}
+\label{architecture:service_resolution:overview}
+\indent
+サービス解決は，以下のような手順で行われる．
+
+\begin{enumerate}
+\item Link Localの通信によるManagerの呼び出し
+\item Managerの応答
+\item Clientからの情報の登録
+\item ManagerからのAck
+\item Client - Manager間のkeepalive
+\end{enumerate}
+
+\subsection{通信の詳細}
+\label{architecture:service_resolution:flow}
+\indent
+サービス解決の際に行われる，通信の様子を図\ref{fig:resolution_dia}に示す．
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics{figure/resolution-dia.eps}
+\caption{Service resolution : diagram}
+\label{fig:resolution_dia}
+\end{center}
+\end{figure}
+
+\indent
+Clientは，Managerの発見のために，Link Localの通信のよりManagerを呼び出す．
+Managerは，{\sf MGR RESOLV}を受信すると，送信者に対して{\sf MGR ACK}を返し，
+自分のIPアドレスをClientに対して通知する．
+Clientは，取得したManagerのIPアドレスに対して接続をし，
+登録要求{\sf MGR REQUEST}を送信する．
+その返答として{\sf MGR ACK}を受信すると，
+Managerへ自身のノード情報を{\sf MGR REGIST}として送信する．
+Clientが，{\sf MGR ACK}を受信する事により，
+ClientのManagerへの情報の登録作業を完了する．
+
+\indent
+Clientは，情報の登録作業が完了したら，
+Managerとの間で，一定間隔でkeepaliveのパケットを交換することにより，
+Clientの生存確認を行う．
+
+\subsection{Client情報のデータ構造}
+\label{architecture:service_resolution:client_info}
+\indent
+ネットワークを用いたメディアストリーミングを行うために必要な情報を，Managerに蓄積する．
+その際に，Managerで扱われる情報を，表\ref{tab:architecture:struct}に示す．
+
+\begin{table}[ht]
+\begin{center}
+\caption{Managerで扱われる情報}
+\input{tabular/architecture-struct.tex}
+\label{tab:architecture:struct}
+\end{center}
+\end{table}
+
+また，Managerにおいて，上記のようなClientのノード情報は図\ref{fig:data_tree}のような構造で管理される．
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics{figure/data-tree.eps}
+\caption{Client node information : Data Structure}
+\label{fig:data_tree}
+\end{center}
+\end{figure}
+
+\indent
+このようなデータ構造に基づき，Clientは{\sf MGR REGIST}送信の際に，
+Managerへ図\ref{src:node-info}のような記述で自身のノード情報を送信する．
+
+\begin{figure}[htbp]
+\begin{screen}
+\begin{verbatim}
+Function,Format,Output(,port number)
+\end{verbatim}
+\end{screen}
+\caption{Client node information : Node information description}
+\label{src:node-info}
+\end{figure}
+
+\indent
+{\sf MGR REGIST}メッセージ送信の際に，ノード情報を1行につき1つずつ記述する．
+アプリケーションがデフォルトで用いるポート番号以外のポートを用いる場合には，
+追加して記述する．
+ノードが複数のFunction，Format，および，Outputに対応している場合には，
+複数行に渡って記述を行う．
+ノード情報を記述する前の行に，Clientノードのこのシステムで用いるホスト名を記述する．
+また，最終行の次の行には，終端文字として"{\sf .}"を挿入する．
+図\ref{fig:data_tree}に対応するデータ送信の記述は，
+図\ref{src:node-info_sample}に示す．
+
+\begin{figure}[htbp]
+\begin{screen}
+\begin{verbatim}
+MGR REGIST
+hostname
+Send,DV,DV Cam
+Send,MPEG2,HDV Cam
+Recv,DV,DV Device
+Recv,DV,Display
+Recv,MPEG2,1394 Device
+Recv,MPEG2,Display
+Recv,Raw HD,SDI Out,10001
+.
+\end{verbatim}
+\end{screen}
+\caption{Client node information : Node information description : Sample}
+\label{src:node-info_sample}
+\end{figure}
+
+\indent
+Clientにおいて，扱うことのできるストリーミングの情報が変化した場合には，
+自身の情報を再度送信し，再登録する．
+
+\section{Managerにおける処理}
+\label{architecture:manager}
+\indent
+Managerにおいて行われる処理は，Client情報の受信，
+Manager間の情報共有，Client情報の視覚化，および，Clientへの操作情報の送信の4つである．
+以下では，各々の処理の設計を述べる．
+
+\subsection{Client情報の受信}
+\label{architecture:manager:recv_info}
+\indent
+Managerは，Clientから受信したノード情報を次のように処理する．
+
+\indent
+Managerは，Clientから{\sf MGR REGIST}メッセージを受信すると，
+その後の行から記述されているノード情報を読み込み，データベースへ格納する．
+この際に，それぞれの情報に一意なIDと，メッセージの送信元IPアドレスを追加する．
+受信した{\sf MGR REGIST}メッセージが複数回目であった場合には，
+メッセージの送信元IPアドレスをキーとして，データベースから登録済み情報を削除し，
+再度，受信したノード情報のデータベースへの格納を行う．
+
+\indent
+ノード情報の受信後は，接続されたソケットを保持し，keepaliveパケットの交換を一定間隔おきに行う．
+一定回数keepaliveに返答がない場合には，そのソケットにバインドされているIPアドレスをキーとして，
+データベースから登録情報を削除する．
+また，このソケットは，ManagerからClientを制御する際に使用される．
+
+\subsection{Manager間の情報共有}
+\label{architecture:manager:share_info}
+\indent
+Managerは，自分のLocal Area Network内で得られたClient情報を，
+他Managerと共有するための動作を以下に述べる．
+
+\indent
+Managerは，収集したClientのノード情報を他Managerと交換するために，
+予め共有されたマルチキャストアドレスにJoinする．
+その後に，そのマルチキャストアドレスに対して{\sf MGR JOIN}メッセージと，
+自身のデータベースに格納されている全ノード情報を送信する．
+また，他Managerからの{\sf MGR JOIN}メッセージを受信した場合には，
+そのManagerへ自身の保持する全ノード情報を送信する．
+受信した他Managerのノード情報は，
+自身の管理するノード情報とは別テーブルに格納する．
+この際，受信したノード情報に，一意なIDと情報送信元ManagerのIPアドレスを追加する．
+
+\indent
+Managerの保持するノード情報に変化があった場合には，
+{\sf MGR CHANGE}メッセージと変更情報を，情報共有に用いられるマルチキャストアドレスに送信する．
+変更情報を受信した際には，他Manager情報が格納されているテーブルに変更情報を反映する．
+
+\subsection{Client情報の視覚化}
+\label{architecture:manager:visualize}
+\indent
+Managerは，収集し，データベースに格納されたClientのノード情報をWebによりユーザへ提供する．
+ユーザは，この画面を用いて，管理されているノードの操作，制御を行う．
+
+\subsection{Clientへの制御情報の送信}
+\label{architecture:manager:control}
+\indent
+Managerは，Web Interfaceを通じて行われたユーザの操作に基づき，Clientへ制御情報の送信を行う．
+Clientは，この情報に基づき，各メディアストリーミングアプリケーションの操作を行う．
+

@@ -1,0 +1,32 @@
+\begin{verbatim}
+
+  if ((n = recvfrom(dvrecv_param->soc,
+                    (char *)&recvbuf, sizeof(recvbuf),
+                     0,
+                    (struct sockaddr *)&from, &length)) < 0) {
+    if(errno==EHOSTUNREACH || errno==ENETUNREACH){
+      continue;
+    } 
+    perror("recvfrom");
+    return;
+  }
+
+
+  (abbreviation)
+
+
+  if (dest_list_obj->frame_drop > 1 &&
+      (frame % dest_list_obj->frame_drop) != 0) {
+
+  }else {
+    if((m = sendto(dest_list_obj->soc,
+                   (char *)&recvbuf, n,
+                    0,
+                   (struct sockaddr *)&dest_list_obj->s_addr,
+                    sizeof(dest_list_obj->s_addr))) < 0){
+       perror("sendto");
+       return;
+     }
+  }
+
+\end{verbatim}

@@ -1,0 +1,134 @@
+# #  Program definitions
+LATEX	= platex
+BIBTEX	= jbibtex
+DVIPS	= dvips
+DVIPSOPT= 
+# DVIPSOPT   = -D 720 -mode esphi -O 0mm,0mm -N0 
+DVIPDF	= dvipdfmx
+DVIPDFOPT = -V 4
+DVIVIEW	= xdvi
+PS_VIEW = gv
+PS2PDF	= ps2pdf
+TEXHTML = latex2html
+OUTUNI	= out2uni
+CP 	= cp 
+RM 	= rm
+SCP	= scp
+SSH	= ssh
+RMOPT 	= -f
+TAR	= tar
+TAROPT	= cvjf
+MAKE	= make
+DATE	= `date "+%m%d%H"`
+USER	= negi
+
+# #  Document definitions
+NAME	= bachelor_thesis
+MAIN	= main
+RESUMEMID = resume_mid
+RESUME = resume
+TARGET	= $(MAIN)
+
+DVI = $(MAIN).dvi $(RESUMEMID).dvi
+PDF = $(MAIN).pdf $(RESUMEMID).pdf 
+STY = eclepsf.sty misc.sty my9pt.sty page4prop.sty
+BIBDIR = bib
+BACKUPDIR = /home/negi/backup
+PUBLICHTML = /home/negi/.public_html
+PUBLICDIR = $(PUBLICHTML)/paper
+UPLOADHOST = cpu.sfc.wide.ad.jp
+URL = http://www.sfc.wide.ad.jp/~negi/paper
+
+# #  Suffixes definitions
+.SUFFIXES: .tex .dvi .ps .pdf .sty .aux .bbl 
+#
+# #  Recipes
+
+all: $(TARGET)
+
+$(TARGET) : toc bib dvi
+
+.tex.aux:
+	$(LATEX) $<
+
+.aux.bbl:
+	$(BIBTEX) $(TARGET)
+	$(LATEX) $(TARGET)
+	$(LATEX) $(TARGET)
+
+.tex.dvi: 
+	$(LATEX) $<
+#	$(LATEX) $<
+
+.dvi.pdf:
+	$(DVIPDF) $(DVIPDFOPT) -o $@ $<
+
+.dvi.ps:
+	$(DVIPS) $(DVIPSOPT) -o $@ $<
+
+dvi : $(TARGET).tex
+	$(LATEX) $(TARGET).tex
+	$(BIBTEX) $(TARGET)
+	$(LATEX) $(TARGET).tex
+	$(LATEX) $(TARGET).tex 
+
+out2uni: dvi
+	$(OUTUNI) -e $(TARGET)
+	$(LATEX) $(TARGET)
+
+toc:
+	#(cd $(FIGDIR); ${MAKE} $(EBB))
+#	$(LATEX) $(TARGET)
+	$(LATEX) $(TARGET)
+
+	$(LATEX) $(TARGET)
+	$(LATEX) $(TARGET)
+	$(LATEX) $(TARGET)
+
+bib: $(BIBDIR)/* $(TARGET).aux $(TARGET).bbl
+	$(LATEX) $(TARGET)
+	$(LATEX) $(TARGET)
+	$(LATEX) $(TARGET)
+
+ps: dvi $(TARGET).ps
+
+pdf: all out2uni $(TARGET).pdf
+	$(CP) $(TARGET).pdf $(PUBLICDIR)/$(USER)-$(NAME)-$(DATE).pdf
+	(cd $(PUBLICDIR); rm $(NAME).pdf && ln -s  $(USER)-$(NAME)-$(DATE).pdf $(NAME).pdf)
+
+local: all out2uni $(TARGET).pdf
+	$(CP) $(TARGET).pdf $(NAME).pdf
+	open $(NAME).pdf
+
+upload:
+	$(SCP) $(TARGET).pdf $(UPLOADHOST):$(PUBLICDIR)/$(USER)-$(NAME)-$(DATE).pdf
+	$(SSH) $(UPLOADHOST) "(cd $(PUBLICDIR); rm $(NAME).pdf && ln -s  $(USER)-$(NAME)-$(DATE).pdf $(NAME).pdf)"
+	open $(URL)/$(NAME).pdf
+
+backup:
+	$(TAR) $(TAROPT) $(BACKUPDIR)/$(NAME).tar.gz ./*.tex ./*.sty $(FIGDIR)
+
+dvi_view: dvi
+	$(DVI_VIEW) $(NAME).dvi &
+
+ps_view: ps
+	$(PS_VIEW) $(NAME).ps
+
+ps2pdf: ps
+	$(PS2PDF) $(NAME).ps
+
+html : 
+	$(TEXHTML) $(NAME).tex
+	mv $(NAME) $(PUBLICDIR)
+
+tmpclean:
+	$(RM) $(RMOPT) *.out *.tmp *.aux *.log *~ *.core core
+
+clean: tmpclean
+	$(RM) $(RMOPT) $(TARGET).dvi $(TARGET).ps $(TARGET).pdf $(TARGET).log \
+       	$(TARGET).bbl $(TARGET).blg $(TARGET).toc $(TARGET).lof $(TARGET).lot
+	(cd $(FIGDIR); ${MAKE} clean)
+	(cd tabular; ${MAKE} clean)
+	(cd src; ${MAKE} clean)
+
+

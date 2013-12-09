@@ -1,0 +1,462 @@
+\documentclass[my9pt,twocolumn,a4j,misc]{jarticle}
+\usepackage{geometry}
+\usepackage{ascmac}
+\usepackage[longnamesfirst]{natbib}
+\usepackage{tabularx}
+\usepackage{here}
+\usepackage[dvipdfm]{graphics}
+\usepackage[dvipdfm]{graphicx}
+\usepackage[dvipdfm]{color}
+\usepackage[dvipdfm, bookmarks=true, bookmarksnumbered=true,%
+bookmarkstype=toc,%
+pdfauthor={Hitoshi Irino},%
+]{hyperref} 
+
+\topmargin = -22.0mm \oddsidemargin = -15mm
+\headheight = 1mm \headsep = 1mm
+\textwidth = 194mm \textheight = 270mm \topskip = 1mm
+\columnsep = 4mm \columnseprule = 0mm
+\parskip = 0pt
+
+\begin{document}
+
+\twocolumn[
+
+%% Title
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{center}
+修士最終試験\\
+{\LARGE\bf フォーマット非依存性を考慮した映像伝送支援技術の研究}\par\vspace{2mm}
+慶應義塾大学大学院 政策・メディア研究科 修士課程2年 CIプログラム\\
+学籍番号:80331285 入野 仁志 irino@sfc.keio.ac.jp \\
+%{\today}\vspace{2mm}
+\end{center}
+
+%% Abstract
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\baselineskip=3.2mm \centerline{\bf 概要}\vspace{2mm} 
+{\small 
+本研究は現在個別的に実現が行われているフォーマット変換を行わない映像転送
+システムにおける，複数の異種入出力の同時利用の実現と，拡張性の確保の実現
+を目的とする．本研究では映像機器が扱う複数種のフォーマットの共通部分の定
+義，及び対象とすべき入出力における共通部分の定義を行う．個別実現がされて
+いるフォーマット変換を行わない映像転送システムの入出力に依存した処理と
+フォーマットに依存した処理の分離を行うことで，システムの拡張性を確保する．
+また複数の異なった入出力や通信方法を同時に利用することのできる自由度の高
+い通信を実現する．}
+\vspace{6mm}
+]
+\baselineskip=5.0mm
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{背景:広帯域環境下での映像転送}
+  通信基盤としてのインターネットの普及及び，
+  インターネットに利用される回線の広帯域化により，
+  大容量の映像，音声の転送が多く利用されるようになった．
+  広帯域環境下での利用を前提とした映像転送技術の中には，
+  高品質映像転送を目的として，
+  計算機と接続可能なデジタル映像機器から入力されるデータを
+  他のフォーマットに変換することなく転送する映像転送技術がある．
+
+%  また映像転送の利用を前提とした新たなプロトコルや通信方法が実現されはじ
+%  めている．
+%  例えば実時間通信を考慮に入れた輻輳制御プロトコルであるSCTPや，
+%  詳細な品質情報を送受する為のRTCP XR，
+%  IPマルチキャスト代替の同報配信技術であるオーバレイマルチキャストなどを
+%  指している．
+  
+%  \subsection{新しい通信方法の普及}
+%  インターネットを利用した映像転送に関係する技術は変化し続けている．
+%  \subsubsection{新しいトランスポート層プロトコル}
+%   TCPの自律的な輻輳制御・再送制御が映像転送において悪影響を与え得るため，
+%   映像転送用途にはUDPが比較的用いられる．
+%   比較的新しく標準化されたSCTPはTCP同等の輻輳制御プロトコルであるが，実時
+%   間通信用途での利用が考慮されたプロトコルである．現在Linux 2.6で標準的に
+%   サポートされている．
+%   \subsubsection{新しいセッション層プロトコル}
+%   IPネットワーク上での実時間通信にはRTPが一般的である．またその品質管理に
+%   はRTCPが用いられる．
+%   VoIPの普及によりこれまでより細かい品質管理が求められるようになり，
+%   RTCPに新たなメッセージプロトコルとして
+%   XR(E\underline{x}tended \underline{R}eport)\cite{RFC3611}が定義された
+%   \subsubsection{一斉同報配信技術}
+%    IPネットワークにおける一斉同報配信技術ではIPマルチキャストが一般的に
+%    十分に利用できない理由から配送をアプリケーション層で行うオーバレイマ
+%    ルチキャスト技術に関する研究が盛んに行われている．
+ 
+ \vspace{-0.8cm}    
+ \section{問題意識}
+ \label{problem}
+ フォーマット変換を行わない映像転送システム既存実装は
+ DVフォーマットを扱うDVTS, DV VoDや
+ MPEG2-TSを扱う広島大学で開発されているrobst，
+ 民生用機器を用いたMPEG2-TS転送システムなどがある．
+ これらの既存技術及び研究は
+ \vspace{-0.2cm} 
+ \begin{itemize}
+  \item 対象とする入出力，またはその通信方法
+       \vspace{-0.2cm} 
+  \item 対象とするデータフォーマット
+ \end{itemize}
+ \vspace{-0.2cm} 
+  の2点以外はほぼ同一である．しかし，これらは個別的に実現されている．
+  特定の入力・出力とフォーマットの組合せ毎に個別的な実現がおこなわれると
+  以下の問題がある．
+  \vspace{-0.2cm} 
+  \begin{itemize}
+   \item 機能性の問題:異種入出力の利用\\ 
+	 既存システムの場合、映像転送システムの利用者は状況に応じてシステ
+	 ムを使い分ける必要がある．
+	 また複数の入出力を同時に利用するといった概念を持たない為に，
+	オーバレイマルチキャストのような通信に対応できない．
+	 \vspace{-0.2cm}
+  \item 拡張性の問題\\ 入出力や通信方法とフォーマットの組合せが固定され
+	ているシステムは，上述した新たに登場したプロトコルなど新たな入出
+	力や通信方法，または新たなフォーマットの登場などの技術的な進歩に
+	対して追従しにくい．
+	現状は各種システムがフォーマットや入出力毎に個別化しているため
+	映像転送システムの開発者に対して，新たな機能の追加時の
+	開発量を増大させる原因となる．
+  \end{itemize}
+  \vspace{-0.8cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{本研究のアプローチ}
+  第\ref{problem}節で述べた問題は，
+  入力，出力，フォーマットが個々のシステム内で依存関係を持っていることに
+  起因する．問題の解決には，これまで実現されて来た映像転送機構の機能を入
+  力・出力・フォーマットの3項を分解し，複数の入力と出力の組合せをフォー
+  マットに依存することなく自由に組み合わせ可能な機構が必要とされる．
+  本研究が提案する機構は以下の特徴を持つ．
+  \vspace{-0.4cm} 
+    \begin{itemize}
+     \item 一律的な入出力処理インタフェースの定義による，
+	   異種入出力の利用における透過性の確保とその同時利用の実現
+	   \vspace{-0.4cm}
+     \item 入出力処理部分とフォーマット処理部分の分離
+	   \vspace{-0.4cm}
+     \item 入出力先毎の個別の品質管理
+  \end{itemize}
+  本研究が提案する機構の概念図を図\ref{fig:newsystem2}に示す．
+  \begin{figure}[H]
+   \begin{center}
+    \includegraphics[width=.48\textwidth]{figure/newsystem2.eps}
+   \end{center}
+  \vspace{-0.8cm}
+   \caption{入出力処理・フォーマット分離機構の概念図}
+   \label{fig:newsystem2}
+  \end{figure}
+  \vspace{-0.8cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \section{設計}
+    現在，多種多様な映像機器があるが，大衆性のある民生用映像機器の代表的な機
+    器の比較検討を行いIEEE1394インタフェースで接続する映像機器に焦点をあ
+    てた．またフォーマットはそれらで用いられる，固定長パケットフォーマッ
+    トであるDVとMPEG2-TSを対象とした．
+    \vspace{-0.8cm}
+  \subsection{本機構の構成要素}
+   \vspace{-0.2cm}
+  本論で提案する機構は以下の4つの機能に分離した部分から構成
+  する．名称の右側に本論で用いる略称を記す．
+  今後分離した機能の総称を本論ではオブジェクトと呼ぶ．
+    \vspace{-0.4cm}
+  \begin{itemize}
+   \item データを送受する部分
+	 \vspace{-0.3cm}
+	 \begin{itemize}
+	  \item フォーマットデータオブジェクト:Format\\ 
+		対象とするフォー
+		マットの実際に扱うデータの保持とその属性を持つ部分
+	  \item 入出力処理オブジェクト:IO\\
+		対象とする入出力に関する処理を行う部分
+	  \item フォーマット処理オブジェクト:Processor\\
+		対象とするフォーマットに依存した処理を行う部分
+	 \end{itemize}
+   \item 他のオブジェクトを管理する部分
+	 \vspace{-0.3cm}
+	 \begin{itemize}
+	  \item セッション管理オブジェクト:Session\\
+		全体の多重入出力管理と時間管理を行う部分
+	 \end{itemize}
+  \end{itemize}
+  \vspace{-0.2cm}
+  フォーマットデータオブジェクト、入出力処理オブジェクト、
+  フォーマット処理オブジェクトが実際のデータの送受を行う
+  セッション管理オブジェクトはこれらの3つのオブジェクトを制御する．
+  セッション管理オブジェクトが他のオブジェクトを制御する状態を，
+  図\ref{fig:SessionControlOtherInstances}に示す．
+  \begin{figure}[t]
+   \begin{center}
+    \includegraphics[width=.48\textwidth]{figure/SessionControlOtherInstances.eps}
+   \end{center}
+  \vspace{-0.8cm}
+   \caption{機能呼び出しの順序とデータの流れの例}
+   \label{fig:SessionControlOtherInstances}
+  \end{figure}
+  \vspace{-0.6cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \subsection{各オブジェクトの詳細}
+  フォーマットデータオブジェクトが各フォーマット共通の属性情報として保持
+  する情報を表\ref{tab:FormatObjectTitle}に示す．
+  フォーマットデータオブジェクトが各フォーマット共通の処理インタフェース
+  として定義するメソッド名とその概要を表\ref{tab:FormatDesignMethodOmit}に
+  示す．
+  入出力処理オブジェクトが各入出力処理共通の属性情報として保持
+  する情報を表\ref{tab:IoObjectTitle}に示す．
+  入出力処理オブジェクトが各入出力共通の処理インタフェース
+  として定義するメソッド名とその概要を表\ref{tab:IoDesignMethodOmit}に
+  示す．
+  \vspace{-0.4cm}
+  \begin{table}[h]
+   \begin{center}
+     \caption{フォーマットデータオブジェクトの保持する属性情報}
+    \begin{small}
+     \input{tabular/FormatObjectTitle.tex}
+    \end{small}
+    \label{tab:FormatObjectTitle}
+   \end{center}
+  \end{table}
+  \vspace{-0.4cm}
+  \begin{table}[h]
+   \begin{center}
+     \caption{フォーマットデータオブジェクトの処理}
+    \begin{small}
+     \input{tabular/FormatDesignMethodOmit.tex}
+    \end{small}
+    \label{tab:FormatDesignMethodOmit}
+   \end{center}
+  \end{table}
+  \vspace{-0.4cm}
+   \begin{table}[ht]
+    \begin{center}
+     \caption{入出力処理オブジェクトの保持する属性情報}
+     \begin{small}
+     \input{tabular/IoObjectTitle.tex}
+     \end{small}
+     \label{tab:IoObjectTitle}
+    \end{center}
+   \end{table}
+  \vspace{-0.4cm}
+   \begin{table}[ht]
+    \begin{center}
+     \caption{入出力処理オブジェクトの処理一覧}
+     \begin{small}
+     \input{tabular/IoDesignMethodOmit.tex}
+     \end{small}
+     \label{tab:IoDesignMethodOmit}
+    \end{center}
+   \end{table}
+   \vspace{-0.8cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+ \section{実装}
+ 実装環境としてOSにLinux Kernel 2.4.26を用いIEEE1394の入出力にlibraw1394
+ を用いた．本実装はVMT(\underline{V}irtual \underline{M}ethod
+ \underline{T}able)を利用して，異種の入出力に対して同一の処理インタフェー
+ スを提供した．またこの機構をライブラリとして実装し，
+ さらにそのライブラリを用いたサンプルアプリケーションの実装を行っ
+ た． 図\ref{implementation:gavotteinterface}にサンプルアプリケーション
+ のコマンドラインインタフェースを示す．サンプルアプリケーションは入力用
+ パラメータ，出力用パラメータはURI形式を用いて表現する．各パラメータの
+ URI形式の書式はプロトコル名に''file'', ``ieee1394'', ``rtp''を，``?''以
+ 降に属性を指定可能である．複数の入出力を扱う場合には'',''を区切り文字に
+ 用いる．
+   \begin{figure}[H]
+    \begin{small}
+     \begin{screen}
+     ./gavotte -I 入力用パラメータ(URI) -O 出力用パラメータ(URI) [-F 利用
+     フォーマット]
+     \end{screen}
+    \end{small}
+   \vspace{-0.8cm}
+    \caption{サンプルアプリケーションコマンドラインインタフェース}
+    \label{implementation:gavotteinterface}
+   \end{figure}
+   \vspace{-1.0cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+ \section{評価}
+  \subsection{開発量の比較}
+  \vspace{-0.2cm}
+  \label{eval:compare_development}
+   開発にかかるコストの比較として，
+   ソースコードの行数の比較と初期手順数の比較を行う．
+   DVTSは
+   IEEE1394からデータを受信しネットワークへ送信するdvsend，
+   ネットワークからデータを受信しIEEE1394へ送信するdvrecv
+   IEEE1394からデータを受信しファイルへ保存するdvsave
+   ファイルからデータを読み出しIEEE1394へ送信するdvplay
+   が含まれる，本実装はこの全ての用途に利用できるため本基盤部分の実装及
+   びサンプルアプリケーションの行数の総和と，
+   DVTSに同梱されるdvsend, dvrecv, dvsave, dvplayの総和を比較した．
+
+   その結果本ライブラリ実装は約4950行，及びサンプルアプリケーションとし
+   てライブラリ外での実装が134行となった．
+   既存実装であるDVTSは約5340行であり，
+   ライブラリを利用すると既存実装と同等以上の機能を
+   ライブラリ利用者は既存の方法と比べて非常に少ない開発量で実現できる．
+
+   また同様に初期手順数を比較した．
+   本実装はDVTSを構成する4アプリケーションと同等以
+   上の機能を統一さ れた7手順で実現可能である．
+
+   \begin{figure}[h]
+    \begin{screen}
+     \begin{enumerate}
+      \begin{small}
+      \item 入力用の入出力オブジェクトリストの初期化
+       \vspace{-0.4cm}
+      \item 出力用の入出力オブジェクトリストの初期化
+       \vspace{-0.4cm}
+      \item 入出力処理オブジェクトインスタンス毎に初期化．
+       フォーマットデータオブジェクトのデータ領域確保と関連付け，
+       リストへの追加．
+       \vspace{-0.4cm}
+      \item フォーマット処理リストの初期化
+       \vspace{-0.4cm}
+      \item  フォーマット処理オブジェクトのインスタンス毎に，インスタン
+       ス生成，リストへの追加，終端フラグの設定．
+       \vspace{-0.4cm}
+      \item セッション管理オブジェクトの生成と初期化と
+	    入力用入出力オブジェクトリスト，
+	    出力用入出力オブジェクトリスト，
+	    フォーマット処理リストの関連付け
+       \vspace{-0.4cm}
+      \item セッションの開始
+      \end{small}
+     \end{enumerate}
+    \end{screen}
+    \vspace{-0.4cm}
+    \caption{本機構を用いた場合の処理の手続きの流れ}
+    \label{fig:evalmymodelflow}
+   \end{figure}
+
+   一方既存アプリケーションであるDVTSに同梱される4つのアプリケーションは
+   その初期手順もそれぞれ個々独立しており，その手順数の総和は19手順となっ
+   ている．本機構は入出力・フォーマットのオブジェクトの独立性が高くかつ
+   拡張が可能な設計をしており，それらのオブジェクトの再利用性が高いこと
+   が本評価から示された．
+
+  本機構が実現する入出力の組合わせを表\ref{tab:evalioox}，
+  既存の複数の実装で実現できる入出力の組合せを表\ref{tab:evaliooxprev}に示す．
+   \begin{table}[h]
+    \begin{center}
+     \caption{本実装の入出力の組合せ}
+     \begin{small}
+     \input{tabular/evalioox.tex}
+     \end{small}
+     \label{tab:evalioox}
+    \end{center}
+   \end{table}
+  \vspace{-0.4cm}
+   \begin{table}[h]
+    \begin{center}
+     \caption{既存実装の入出力の組合せ}
+     \begin{small}
+     \input{tabular/evaliooxprev.tex}
+     \end{small}
+     \label{tab:evaliooxprev}
+    \end{center}
+   \end{table}
+  \vspace{-0.4cm}
+
+  本機構は約4950行で実現で全ての入出力を実現しているが，
+  既存実装はDVTSが約5340行，
+  ファイルからRTP/UDPへの送出を実現するDV VoDシステムは約920行である．
+  本機構は機能を拡張しつつ，少ない開発量で実現している．
+
+%  \subsection{性能比較} 
+%  本実装サンプルアプリケーションと処理内容が酷似するDVTSの送信側アプリケー
+%  ションのdvsendとの性能比較を行った．
+%  評価用いた計算機環境を表\ref{tab:evalenv}に示す．
+%  図\ref{fig:gavottevsdvsend_cpu}に約50秒間のCPU使用率の遷移を，表
+%  \ref{tab:gavottevsdvsend_cpu}にCPU使用率, メモリ使用率の約50秒間の値
+%  の平均の比較を示す．
+%  \vspace{-0.4cm}
+%  \begin{table}[h]
+%   \begin{center}
+%    \caption{評価用計算機環境}
+%   \begin{small}
+%    \input{tabular/evalenv.tex}
+%   \end{small}
+%    \label{tab:evalenv}
+%   \end{center}
+%  \end{table}
+
+%   本機構はおよそ処理量は1.61倍必要とし，メモリ領域は2倍必要とすること
+%   がわかった．また多重化したときの処理量はさらに1.78倍かかることがわかっ
+%   た．
+%   この処理量の増加が映像転送時に影響するか否かの検証を目的に
+%   処理時間の計測を行った．
+%   表\ref{tab:gavottevsdvsend_delay_mini}の結果から，
+%   本機構が最初のデータ入力までの時間に大きな差があるが，
+%   その後の連続した処理ではほとんど差がないこと分かった．
+%  \vspace{-0.8cm}
+%  \begin{figure}[h]
+%   \begin{center}
+%     \includegraphics[width=.49\textwidth]{figure/gavottevsdvsend_cpu_wide.png}
+%   \end{center}
+%   \vspace{-0.8cm}
+%   \caption{本実装と既存実装(dvsend)の処理におけるCPU使用率の遷移}
+%    \label{fig:gavottevsdvsend_cpu}
+%  \end{figure}
+%   \begin{table}[h]
+%    \begin{center}
+%     \caption{本実装と既存実装(dvsend)の使用計算機資源比較} 
+%     \begin{small}
+%      \input{tabular/gavottevsdvsend_resource_mini.tex}
+%      \end{small}
+%     \label{tab:gavottevsdvsend_cpu}
+%    \end{center}
+%   \end{table}
+%   \begin{table}[h]
+%    \begin{center}
+%     \caption{本実装と既存実装(dvsend)の処理時間比較}
+%     \begin{small}
+%     \input{tabular/gavottevsdvsend_delay_mini.tex}
+%     \end{small}
+%     \label{tab:gavottevsdvsend_delay_mini}
+%    \end{center}
+%   \end{table}
+   \vspace{-0.8cm}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{研究成果と今後の課題}
+\vspace*{-0.2cm}
+\subsection{研究成果}
+\vspace*{-0.2cm}
+本研究は，
+映像機器が用いるデータフォーマットを中間的なフォーマットに変換することな
+く転送する映像転送システムにおいて，
+入出力処理とフォーマットに関する処理の分離による
+入出力機能の同時利用と拡張性の確保を実現した．
+本研究において実現された機構は
+複数の異種の入出力の対象に異なった品質で入出力を可能にするために，
+1) 入出力の属性及びを保持し処理を担当する部分，
+2) フォーマットに依存した属性を保持する部分，
+3) フォーマットに依存した処理を行う部分，
+4) 全体の多重入出力と時間管理を行う部分
+に機能を分割し設計，実装を行った．
+この機構を利用して映像転送システムを開発する場合，
+本機構の利用により，開発が軽減される．
+本機構を拡張する場合追加するフォーマットや入出力固有の部分を作成すれば良い．
+映像転送システムの利用者が本研究の成果を利用する場合は，
+複数の入出力の多重化可能であり，その操作が統一される利点がある．
+本研究の設計上の制限として，対応可能なフォーマットに一部制限がある．
+対応可能なフォーマットの条件として，
+固定長パケットを基本単位としたフォーマットであり
+入出力部分に自己のデータ構造を写像しないフォーマットである．
+\vspace*{-0.4cm}
+\subsection{今後の課題:外部の情報の利用}
+\vspace*{-0.2cm}
+本論は特定のフォーマットと入出力の組合せによる映像転送の実現に問
+題の焦点をあて，それを分離する方法に関して述べた．
+実際の利用時には様々な情報の指定が必要となる．
+特に一般に映像転送アプリケーションの情報は
+SDPによって記述されRTSPやSIPなどを用いて交換される場合が多い．
+それらのプロトコルとの連係や親和性の確保に関して今後取り組む必要性がある．
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\bibliographystyle{unsrt}
+%\begin{tiny}
+%\bibliography{bib/domestic-irino,bib/domestic-service,bib/dvts,bib/ieee-stndard,bib/rfc,bib/software,bib/standard,bib/streaming-articles,bib/transport-articles}
+%\end{tiny}
+
+\end{document}

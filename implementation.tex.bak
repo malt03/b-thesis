@@ -1,0 +1,251 @@
+\chapter{実装}
+\label{implementation}
+\indent
+本章では，\ref{architecture}章で述べた設計をもとに，配信制御機構の実装について述べる．
+なお，本機構の映像配信機構としてインターネット上でDVデータの送受信を行うDVTSを対象に設計を行い，
+その設計に従い，実装を行った. 
+
+\section{実装環境}
+\label{implementation:place}
+\indent
+本機構の実装を行ったソフトウェア環境は表\ref{tab:soft}の通りである. 
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & 環境1 & 環境2 & 環境3 & 環境4 \\
+\hline\hline
+OS & \multicolumn{2}{|c|}{Debian Linux 2.6.18} & \multicolumn{2}{|c|}{Debian Linux 2.6.24} \\
+\hline
+プログラム言語 & \multicolumn{4}{|c|}{C言語} \\
+\hline
+コンパイラ & \multicolumn{4}{|c|}{gcc-4.1.2} \\
+\hline
+ライブラリ & \multicolumn{4}{|c|}{libc-2.3.6} \\
+\hline
+\end{tabular}
+\caption{ソフトウェア環境}
+\label{tab:soft}
+\end{center}
+\end{table}
+
+\indent
+次に実装を行ったハードウェア環境を表\ref{tab:hard}に示す．
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & 環境1 & 環境2 & 環境3 & 環境4 \\
+\hline\hline
+CPU & Intel Pentium4 & Intel Core Duo & Intel Pentium4 & AMD Athlon(tm) XP 2200+ \\
+ & 2.80GHz & 1.66GHz & 3.00GHz & 1.80GHz \\
+\hline
+メモリ & 512KB & 1024KB & 512KB & 256KB \\
+\hline
+HDD & 189.92GB & 100GB & 114.50GB & 189.92GB \\
+\hline
+\end{tabular}
+\caption{ハードウェア環境}
+\label{tab:hard}
+\end{center}
+\end{table}
+
+
+
+\section{実装概要}
+\label{implementation:overview}
+\indent
+本機構では映像配信機構としてインターネット上でDV データの送受信を行うDVTSを用いる．
+本機構の映像配信機構はDVTSを拡張する形で実装を行う．
+
+\subsection{情報取得}
+\label{implementation:overview:accession}
+\indent
+中継サーバ・受信ノードの情報として中継サーバでは自身にかかる負荷値としてLoad Averageの取得を行い，
+受信ノードでは受信の際発生しているパケットロス値の取得を行う．本実装ではOSとしてLinuxを用
+いているため，Load Averageの情報はproc file system，パケットロスの情報はDVTSから提供されてい
+る．本実装では，これらの値の取得関数化した．
+
+\vspace{8mm}
+\noindent
+\textbf{Load Average}
+\vspace{5mm}
+
+\indent
+Load Averageの値としてLinux Kernelが用いるproc file systemを利用する．
+Load Averageの値は/proc/loadavgファイルから取得が可能でるため，図\ref{fig:load}のavg関数を作成し，
+格納する．
+
+\vspace{5mm}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=200pt]{figure/load_average.eps}
+\caption{Load Average 取得}
+\label{fig:load}
+\end{center}
+\end{figure}
+
+\noindent
+\textbf{パケットロス値}
+\vspace{5mm}
+
+\indent
+パケットロスの値としてDVTSの既存の関数(pkt\_loss)を用いる．
+具体的な方法としては図\ref{fig:loss}のように受信したデータのrtpヘッタ値を前後で比較し，パケットロスが
+発生しているかを確認する．パケットロス値は受信したパケットの総合値が既存関数のpkt\_loss\_countと同じ値
+になるまでに発生したパケットロス値の合計を表示する．取得したpkt\_lossの値をdvrecv\_param構造体に新たに
+作成したpkt\_loss\_send関数に格納する．pkt\_loss\_sendの値は後に情報考察モジュール内で使用する．
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=200pt]{figure/packet_loss.eps}
+\caption{パケットロス 取得}
+\label{fig:loss}
+\end{center}
+\end{figure}
+
+
+\newpage
+\subsection{情報考察}
+\label{implementation:overview:change}
+
+\indent
+情報取得モジュールより取得された中継サーバ・受信ノードの情報はそれぞれで設定された条件に応じて
+配信先・配信元の変更要求を管理サーバに対して行う．
+
+
+\vspace{8mm}
+\noindent
+\textbf{中継サーバ側の変更要求}
+\vspace{5mm}
+
+\indent
+中継サーバの変更要求の条件は，中継サーバが配信を行う総受信ノード数と取得してきたLoad Averageに閾値を
+設けることで，条件検索を行う．条件を満たしている場合，リンク情報モジュールを経て，管理サーバへと
+変更要求メッセージを送信する．
+
+
+\vspace{8mm}
+\noindent
+\textbf{受信ノード側の変更要求}
+\vspace{5mm}
+
+\indent
+受信ノードの変更要求の条件は，DVTSより取得してきたパケットロス数に閾値を設けることで条件検索を行う．
+このとき，パケットロスの発生が一時的な場合，継続的な場合とが考えられる．そのため，連続的にパケットロスが
+一定回数以上発生した場合，管理サーバへと変更要求メッセージを送信する．
+
+
+\vspace{8mm}
+\noindent
+\textbf{定期報告・変更要求の送信タイミングの調整}
+\vspace{5mm}
+
+\indent
+中継サーバが高負荷であり，受信ノードの変更要求を破棄する状態が継続する場合，
+受信ノードが頻繁に管理サーバと通信を行うことは管理サーバの計算機資源的にもネットワーク帯域資源的にも
+負荷が増大する．この場合，管理サーバの情報管理モジュールにより受信ノード内のsleep()の引数を状況に
+応じて変動することで，定期報告・変更要求の送信タイミングの調整を行う．
+
+
+\subsection{リンク情報}
+\label{implementation:overview:link}
+\indent
+リンク情報モジュールは中継サーバ・受信ノードの情報取得モジュールで取得してきた情報データやが送受信され，
+管理サーバの情報管理モジュールへと送信される．情報データはデータベースに格納され，情報管理モジュールで使
+用される． また，リンク情報モジュールは中継サーバ・受信ノードの生存確認に使用される．
+
+\vspace{8mm}
+\noindent
+\textbf{情報の送受信}
+\vspace{5mm}
+
+\indent
+中継サーバ・受信ノードの情報管理には図\ref{fig:node_info}のnode\_info構造体を利用する．
+各中継サーバ・受信ノードの区別は構造体内のソケットのファイル・ディスクリプターを格納する
+soc関数によって識別を行い，sockaddr\_in構造体にそれぞれのIPアドレスを格納する．
+受信ノードのパケットロス値，パケット総数はpkt\_loss，pkt\_sumに格納され，中継サーバの配信台数
+，総fps数をnum，fps\_sumに格納する．また，中継サーバのLoad Averageをavg\_1m，avg\_5m，avg\_10m，
+run\_proに格納し，中継サーバの配信先IPアドレスをcli\_addr構造体に格納する．
+
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=200pt]{figure/node_info.eps}
+\caption{node\_info構造体}
+\label{fig:node_info}
+\end{center}
+\end{figure}
+
+\vspace{8mm}
+\noindent
+\textbf{生存確認}
+\vspace{5mm}
+
+\indent
+中継サーバ・受信ノードのリンクを保持するために，管理サーバ・中継サーバ間，管理サーバ・受信ノード間
+で図\ref{fig:accept}のTCP Socketを作成し，accept()とconnect()を利用した生存確認を行う．
+
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=440pt]{figure/accept.eps}
+\caption{生存確認}
+\label{fig:accept}
+\end{center}
+\end{figure}
+
+
+
+\subsection{情報管理}
+\label{implementation:overview:control}
+\indent
+本機構の配信に参加，もしくは参加要求を行っている受信ノードの情報は，管理サーバのnode\_info構造体内で
+管理を行う．管理サーバは全ての中継サーバ・受信ノードからnode\_info構造体内のそれぞれに合う項目のデータを
+受信する．
+
+\vspace{8mm}
+\noindent
+\textbf{配信先の決定}
+\vspace{5mm}
+
+\indent
+管理サーバは配信に対して新規に接続要求が受信ノードからあった場合，もしくは中継サーバの状態により配信先
+受信ノードを変更する場合，データベースであるnode\_info構造体を参照し，検索条件に応じて配信元となる中継
+サーバを決定する．
+
+
+\vspace{8mm}
+\noindent
+\textbf{転送品質の決定}
+\vspace{5mm}
+
+\indent
+管理サーバは中継サーバの切り替えを行うにあたり，node\_info構造体のLoad Averageを参照する．このとき，
+全ての中継サーバのLoad Averageが一定以上で且つ，受信ノードで頻繁にパケットロスが発生している場合，
+情報管理モジュールはDV転送レートを調整し，パケットロスの発生を抑える．
+
+
+\vspace{8mm}
+\noindent
+\textbf{エラー処理}
+\vspace{5mm}
+
+\indent
+中継サーバが異常停止した場合，リンク情報より中継サーバの生存確認が不可能になる．その場合は，node\_info構造体内
+に格納されている停止した中継サーバの配信していた受信ノードのIPアドレスを格納したcli\_addr構造体を参照する．
+このとき，映像・音声配信の途切れを最小限にすることが重要と考える．そのため，周囲の中継サーバの状態を問わず他の
+中継サーバに配信を行わせる．その後，中継サーバの負荷が均一になるようnode\_info構造体を参照し配信先の変更を行う．
+
+
+\subsection{DVTS制御}
+\label{implementation:overview:tscontrol}
+
+\indent
+参加受信ノードの接続要求に応じて中継サーバの映像配信機構であるDVTSに対し，配信開始・停止及び
+DVデータの送信先の指定を管理サーバからの配信命令に従い，配信制御モジュールで行う必要がある．
+本実装では，配信先として管理サーバから指定された接続ノードのデータを元に配信制御モジュールを
+DVTS内に実装することで，直接DVTSの配信先データを格納している構造体を編集する．
+

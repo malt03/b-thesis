@@ -1,0 +1,20 @@
+\begin{verbatim}
+
+struct dest_list_obj {
+  /* socket fd must be here, since setsockopt is needed */
+  /* for setting multicast TTL and other things. */
+  int soc;
+  char  dest_str[256];
+  int   port;
+  struct sockaddr_storage s_addr;
+  /* FOR MULTICAST */
+  int multi_ttl;
+  char *multi_ifname;
+  char *multi_ifname6;
+  u_int32_t	pkt_count;
+  int frame_drop;
+  struct dest_list_obj *prev;
+  struct dest_list_obj *next;
+};
+
+\end{verbatim}

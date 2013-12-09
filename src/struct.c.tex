@@ -1,0 +1,29 @@
+\begin{verbatim}
+struct cli_addr{
+  int soc;
+  stract sockaddr_in claddr;
+  int f_rate;
+  int sl_num;
+  int cnt;
+  int s_loss[FD_SETSIZE];
+};
+
+struct node_info{
+  int soc;
+  struct sockaddr_in addr;
+  int pkt_loss;
+  int pkt_sum;
+  int fps_sum;
+  int sl_num;
+  int f_rate;
+  char load_avg[30];
+  double avg_1m, avg_5m, avg_15m;
+  int run_pro;
+  struct cli_addr cl_ipaddr[10];
+  int cnt;
+  int pkt_flag[10];
+  int pkt_flag_sum;
+  u_long report_cnt;
+};
+
+\end{verbatim}

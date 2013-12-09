@@ -1,0 +1,16 @@
+\begin{verbatim}
+char avg[30];
+FILE *fp;
+
+  (abbreviation)
+
+memset(avg, 0, sizeof(avg));
+memset(buf, 0, sizeof(buf));
+if((fp = fopen("/proc/loadavg", "r")) == NULL){
+  printf("file open error\n");
+  return(-1);
+}
+while(fgets(avg, 30, fp) != NULL){
+  printf("load_average: %s\n", avg);  
+}
+\end{verbatim}

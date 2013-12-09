@@ -1,0 +1,28 @@
+\begin{verbatim}
+{
+int sock1, sock2, new_sock;
+int i;
+
+  (abbreviation)
+
+ if(listen(sock1, SOMAXCONN) < 0){/*クライアント*/
+   perror("listen");
+   return(-1);
+ }
+ if(listen(sock2, SOMAXCONN) < 0){/*中継サーバ*/
+   perror("listen2");
+   return(-1);
+ }
+ for(i = 0; i < FD_SETSIZE; i++){ 
+  if(FD_ISSET(i, &fds)){
+   if(i==sock1){
+
+  (abbreviation)
+
+    if((new_sock = accept(sock1,(struct sockaddr *)&cl_addr,&len))<0){
+      perror("accept");
+      return -1;
+     }
+
+  (abbreviation)
+\end{verbatim}

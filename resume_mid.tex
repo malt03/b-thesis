@@ -1,0 +1,168 @@
+\documentclass[my9pt,twocolumn,a4j,misc]{jarticle}
+\usepackage{geometry}
+\usepackage{ascmac}
+\usepackage[longnamesfirst]{natbib}
+\usepackage[dvipdfm]{graphics}
+\usepackage[dvipdfm]{graphicx}
+\usepackage[dvipdfm]{color}
+\usepackage[dvipdfm, bookmarks=true, bookmarksnumbered=true,%
+bookmarkstype=toc,%
+pdfauthor={Hitoshi Irino},%
+]{hyperref} 
+
+\topmargin = -22.0mm \oddsidemargin = -15mm
+\headheight = 1mm \headsep = 1mm
+\textwidth = 194mm \textheight = 280mm \topskip = 1mm
+\columnsep = 4mm \columnseprule = 0mm
+\parskip = 0pt
+
+\begin{document}
+
+\twocolumn[
+
+%% Title
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{center}
+修士中間発表\\
+{\LARGE\bf 映像伝送技術を対象とした汎用化機構の研究}\par\vspace{2mm}
+慶應義塾大学大学院 政策・メディア研究科 修士課程2年 CIプログラム\\
+学籍番号:80331285 入野 仁志 irino@sfc.keio.ac.jp \\
+%{\today}\vspace{2mm}
+\end{center}
+
+%% Abstract
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\baselineskip=3.2mm 
+\centerline{\bf 概要}\vspace{2mm} 
+{\small 
+本研究ではデジタル映像機器を用いたネットワーク上の映像転送において
+多様化する映像フォーマットと多様化する入出力インタフェースの特徴を抽出し、
+環境の変化に容易に対応することを目的とした汎用的映像転送システムアーキテ
+クチャを設計する
+}
+\vspace{6mm}
+]
+\baselineskip=5.0mm
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{背景:インターネット上での高品質映像転送}
+インターネットに用いられる加入者系回線と幹線系回線の両方において広帯域化
+が進み、映像等の大容量データの通信が行える環境が整ってきた．インターネッ
+ト上での映像転送では、変動性のあるネットワーク下で、可能な限り高品質で途
+切れることなく映像が転送されることが求められる．
+
+\section{問題意識}
+技術進歩によって可能となる事項が増えると同時に、環境に多様性がうまれる．
+例えば普及帯デジタル映像機器を用いた高品質映像転送技術を取り巻く環境は以
+下の変化が起こった．
+\begin{verbatim}
+・入出力の多様化
+  −対象：インタフェース(IEEE1394, USB), ファイル, ネットワーク
+  −映像フォーマット：DVフォーマット, MPEG2-TS, MPEG2-PES
+・資源格差の拡大
+  −計算機資源：高性能サーバ, 専用家電, モバイル端末
+  −ネットワーク資源：10Gbit Ethernet, Bフレッツ, ADSL
+\end{verbatim}
+
+一方ネットワークを介して情報量が大きい映像転送を行う場合に考慮しなければ
+ならない要件の一例として以下が挙げられる.
+
+\begin{verbatim}
+・通信路上での帯域にあわせた通信とエラーや揺らぎへの対策
+・平滑化したトラフィックの生成
+  バースト性の強い通信は途中の経路でデータ欠損する確率が
+  高く、またバッファの限られた機器に対して親和性が低い．
+\end{verbatim}
+また映像転送が一般化し、遠隔編集や映像同期等の高度の操作が現実的になりつ
+つあり、時間情報など映像データが持つ情報を有効活用する必要性が増えた．こ
+のように、対象とすべき入出力とその上を流れる映像音声フォーマット、さらに
+その利用方法が多様化する状況下で、個々のインタフェースやフォーマットにに
+おいて上述した通信環境に適応するための要件を満たしたアプリケーションをば
+らばらに作成し、提供する状況は開発者にとって労力が大きいため実用に耐える
+アプリケーションが生まれにくく、利用者にとってもその利用機会が減るデメリッ
+トが生まれる．
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{研究内容}
+\subsection{研究概要}
+本研究では、複数の映像伝送技術を対象として、その特徴の整理を行い、その汎
+用的に利用するための機構の設計を行う．実際の映像伝送は入出力の対象と、そ
+れが利用する映像音声のデータフォーマットで決まる．
+
+計算機内での映像音声処理はデータの入力、加工、出力の三段階に分割したモデ
+ルで表現できる．計算機内の映像音声処理モデルを図\ref{avmodel}に示す．
+
+\begin{figure}[h]
+ \begin{center}
+  \includegraphics[width=180pt]{figure/avmodel.png}
+ \end{center}
+ \caption{計算機内の映像音声処理モデル}
+ \label{avmodel}
+\end{figure}
+\vspace{-1.2cm}
+
+\subsection{設計}
+前述のモデルを階層化モデルを用いて、その役割を明確にする．
+映像音声データ加工層は各映像フォーマットの情報のみを取り扱い，
+入出力層では、各伝送路へのデータの送受に必要なカプセル化、脱カプセル化を
+行う．
+
+%\begin{figure}[h]
+% \begin{center}
+%  \includegraphics[width=230pt]{figure/dataprocess_layering2.png}
+% \end{center}
+% \caption{計算機内の処理階層化モデル}
+% \label{avmodel}
+%\end{figure}
+%\vspace*{-1.2cm}
+
+\subsection{特性の比較}
+汎用化を行うために、いくつかの伝走路においてその特徴を比較を行っている
+表\ref{tab:iointerface_feature}に入出力機構で取り扱う入出力対象の比較を
+示す
+\begin{table}[h]
+\begin{center}
+\caption{入出力対象の比較}
+\input{tabular/iointerface_feature.tex}
+\label{tab:iointerface_feature}
+\end{center}
+\end{table}
+\vspace*{-1cm}
+同様に映像フォーマットにおいて扱うべきフォーマットを表
+\ref{tab:avformat_feature}に示す
+
+\begin{table}[h]
+\begin{center}
+\caption{映像フォーマットの比較}
+\input{tabular/avformat_feature.tex}
+\label{tab:avformat_feature}
+\end{center}
+\end{table}
+\vspace*{-1.2cm}
+
+\section{今後の予定}
+今後の予定は本モデルと特性の比較を元に詳細なシステムデザインを考えプロト
+タイプの実装を行う．
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\bibliographystyle{unsrt}
+%\begin{tiny}
+%\bibliography{bib/domestic-irino,bib/domestic-service,bib/dvts,bib/ieee-stndard,bib/rfc,bib/software,bib/standard,bib/streaming-articles,bib/transport-articles}
+%\end{tiny}
+
+\end{document}

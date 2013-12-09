@@ -1,0 +1,2 @@
+\bibliographystyle{unsrt}
+\bibliography{bib/rfc,bib/ieee,bib/buffer,bib/otherstandard,bib/org,bib/products,bib/report,bib/id,bib/common,bib/dv,bib/ecn,bib/ns,bib/platform,bib/ownpaper,bib/timestamp,bib/tcp-friendly,bib/av-1394,bib/rtp,bib/programming,bib/dvhs,bib/mpeg,bib/soi,bib/event,bib/multimediadb,bib/sync,bib/itu,bib/standard,bib/bthesis}

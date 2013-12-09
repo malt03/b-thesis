@@ -1,0 +1,17 @@
+From: Kazunori UHYO Sugiura <uhyo@sfc.wide.ad.jp>
+Date: Fri, 07 Jul 2006 12:07:45 +0100 (GMT 夏時間)
+To: tomine@sfc.wide.ad.jp
+Subject: Soturon Karitoji
+X-Mailer: Mew version 5.1rc1 on Emacs 22.0.50 / Mule 5.0 (SAKAKI)
+
+
+
+uhyoのとうみね君卒論仮とじの許可メッセージです．
+
+トウミネ君の卒論ですが，まだ具体的な実装評価を行う
+ための実験が行われていないため，その部分にかんしては，
+実験終了後に書いてもらおうと思っています．
+まだ十分時間があるので，是非いい論文に仕上がるのを
+願っています
+
+uhyo.

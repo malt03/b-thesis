@@ -1,0 +1,94 @@
+%\documentclass[12pt,ascmac]{jreport}
+\documentclass[12pt]{jreport}
+\usepackage{eclepsf}
+\usepackage{tascmac}
+\usepackage{tabularx}
+\usepackage[longnamesfirst]{natbib}
+\usepackage[dvipdfm]{graphics}
+\usepackage[dvipdfm]{graphicx}
+\usepackage[dvipdfm]{color}
+%\usepackage[dvipdfm, colorlinks, breaklinks,%
+\usepackage[dvipdfm, breaklinks,%
+bookmarks=true, bookmarksnumbered=true,%
+bookmarkstype=toc, bookmarksopen=true,bookmarksopenlevel=3,%
+pdftitle={Network Media Streaming Environment Management System consideration on decentralized environment},%
+pdfsubject={},%
+pdfauthor={Gen Mineki},%
+pdfkeywords={1. STREAMING, 2. adaptive communication 3. IP Multicast}%
+\AtBeginDvi{\special{pdf:tounicode EUC-UCS2}}
+]{hyperref}
+\usepackage{fancyhdr}
+
+\usepackage{doxygenorig}
+
+\usepackage{indentfirst}
+\usepackage{url}
+
+%\usepackage{amssymb}
+%\usepackage{supertabular,multirow}
+
+% A4  size: 297mm*210mm %1pt = 0.35mm
+\setlength{\topmargin}{-3.4mm} % 10pt 25.4mm - 3.4mm = 22mm
+\setlength{\oddsidemargin}{-0.4mm} % 25.4mm - 0.4mm = 25mm
+\setlength{\evensidemargin}{-0.4mm} % 25.4mm - 0.4mm = 25mm
+\setlength{\textheight}{231mm} % 660pt % original is 225.75mm 645pt
+\setlength{\textwidth}{160mm} % 457pt
+
+\renewcommand{\topfraction}{.99}
+\renewcommand{\textfraction}{.0}
+\renewcommand{\floatpagefraction}{.99}
+\renewcommand{\bibname}{参考文献}
+
+\pagestyle{fancy}
+%\rhead[]{\leftmark} 
+%\lhead[\rightmark]{} 
+
+\makeatletter
+\def\chaptermark#1{\markboth {\ifnum \c@secnumdepth>\m@ne
+\@chapapp\ \thechapter \@chappos\ \fi #1}{}}
+\makeatother
+
+\begin{document}
+
+\pagenumbering{roman}
+
+\input{titlepage}
+
+\thispagestyle{empty}
+\input{abstract_japanese}
+\clearpage
+
+\thispagestyle{empty}
+\input{abstract_english}
+\clearpage
+
+\tableofcontents\thispagestyle{empty} %目次
+\clearpage
+
+\listoffigures\thispagestyle{empty} %図目次
+\clearpage
+
+\listoftables\thispagestyle{empty} %表目次
+\clearpage
+
+\pagenumbering{arabic}
+\input{introduction}
+\input{element}
+\input{related}
+%\input{difficulties}
+\input{approach}
+%\input{related_works}
+\input{architecture}
+\input{implementation}
+\input{evaluation}
+\input{conclusion}
+\input{acknowledgement}
+
+\input{biblio}\thispagestyle{empty}
+\renewcommand{\thechapter}{\Alph{chapter}}
+\setcounter{chapter}{0}
+\appendix
+\input{appendix}
+
+
+\end{document}

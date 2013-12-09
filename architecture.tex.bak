@@ -1,0 +1,350 @@
+\chapter{設計}
+\label{architecture}
+
+
+
+\indent
+本章では前述した本研究の目的を満たすべく, 
+\noindent
+本システムの受信者ごとに適応配信を行うためのフレームワークを構築する.
+
+\section{設計要件}
+\label{architecture:requirement}
+
+\indent
+本機構の必要機能は以下の通りである. 
+
+
+\begin{itemize}
+\item リアルタイム配信に対応する配信サーバの変更可能な映像配信機構 
+\item ノード情報の管理及び配信網の再構築
+\item 計算機資源の数値化
+\end{itemize}
+
+\subsection{全体構成}
+\label{architecture:framework}
+
+\indent
+本機構の全体概要を図\ref{fig:mod}に示す. 
+本機構を構成するモジュールは, 以下の通りである. 本機構ではノードの情報, 
+中継サーバの情報を管理するサーバに応じて構成するモジュールが表\ref{tab:mod}のように変化する. 
+また, 本機構は映像配信機構と配信制御機構によって構成されている. 
+
+
+
+\begin{itemize}
+	\item 情報の取得 \\
+	　ノードの受信している音声・映像品質 \\
+	　中継サーバに対する負荷の数値化, 配信先数
+	\item ノード情報の管理 \\
+	　ノードの参加, 削除, 更新, 参照 \\
+	　他中継サーバとの参照, 比較
+	\item リンク情報 \\
+	　取得情報の送受信, 生存確認 
+	\item 映像配信機構制御 \\
+	　映像配信の開始・停止, 宛先の指定
+\end{itemize}
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=400pt]{figure/modul.eps}
+\caption{全体モジュール概要}
+\label{fig:mod}
+\end{center}
+\end{figure}
+
+\vspace{8mm}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+ & 送信ノード & 管理サーバ & 中継サーバ& 受信ノード \\
+\hline\hline
+情報取得モジュール & - & - & ○ & ○ \\
+\hline
+情報管理モジュール & - & ○ & - & - \\
+\hline
+リンク情報モジュール & - & ○ & ○ & ○ \\
+\hline
+映像配信制御モジュール & - & - & ○ & - \\
+\hline
+映像配信機構 & ○ & - & ○ & ○ \\
+\hline
+\end{tabular}
+\label{tab:mod}
+\caption{構成モジュール}
+\end{center}
+\end{table}
+
+
+
+\section{動作概要}
+\label{architecture:motion}
+
+\indent
+本節では本システムの動作概要を管理サーバ, 中継サーバ, 受信者のそれぞれで示す. 
+
+\newpage
+\subsection{管理サーバ}
+\label{architecture:motion:admin}
+
+\indent
+本機構の管理サーバの各モジュールの関係及び, 動作概要を図\ref{fig:cont}に示す.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=440pt]{figure/control.eps}
+\caption{管理サーバモジュール概要}
+\label{fig:cont}
+\end{center}
+\end{figure}
+
+\begin{enumerate}
+\item 情報管理モジュールへの中継サーバ・受信ノードからの接続要求
+\vspace{-1mm}
+
+
+\item 情報管理モジュールによる中継サーバと受信ノードのマッチング
+\item 映像配信機構による配信を行う中継サーバ・配信先の決定
+\item 接続要求受信ノードへの映像配信機構によるデータの中継
+\item 情報取得モジュールへの中継サーバ・受信ノード情報取得
+\item 情報管理モジュールによる中継を行う中継サーバの決定\\[1.0cm]
+\end{enumerate}
+
+
+\newpage
+\subsection{中継サーバ}
+\label{architecture:motion:relay}
+
+\indent
+本機構の中継サーバの各モジュールの関係及び, 動作概要を図\ref{fig:relay}に示す.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=440pt]{figure/relay.eps}
+\caption{中継サーバモジュール概要}
+\label{fig:relay}
+\end{center}
+\end{figure} 
+
+
+\begin{enumerate}
+\item 管理サーバの情報管理モジュールへの中継サーバ情報の追加
+\item 送信者からストリーミングをマルチキャストで受信
+\item 管理サーバによる中継を行う中継サーバの決定
+\item 管理サーバより配信命令の受信・受信ノードへユニキャストで配信
+\item 情報取得モジュールよるOSからの情報を取得 
+\item 管理サーバへ取得情報の送信
+\end{enumerate}
+
+\newpage
+\subsection{受信ノード}
+\label{architecture:motion:client}
+
+\indent
+本機構の受信ノードの各モジュールの関係及び, 動作概要を図\ref{fig:cli}に示す.
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=440pt]{figure/client.eps}
+\caption{受信ノードモジュール概要}
+\label{fig:cli}
+\end{center}
+\end{figure}
+
+
+\begin{enumerate}
+\item 管理サーバの情報管理モジュールへの受信ノード情報の追加
+\item 中継サーバよりコンテンツの受信
+\item 受信中のコンテンツの品質状況を確認
+\item 管理サーバへ取得情報の送信
+\end{enumerate}
+
+
+\newpage
+\section{配信制御機構の機能}
+\label{architecture:control}
+
+\indent
+配信制御機構では中継サーバの計算機資源に対する負荷の数値化, 
+中継サーバの配信情報の管理, 受信ノード情報の管理, 音声・映像の品質情報の管理, 
+中継サーバ・受信ノード間リンクの保持, 映像配信機構の制御を行う. 
+
+
+\subsection{情報取得モジュール}
+\label{architecture:control:accession}
+\indent
+情報取得モジュールでは, 配信網に参加する中継サーバでは自身の計算機資源に対する負荷を取得し, 
+受信ノードでは現在受信しているコンテンツの映像の品質情報を取得する. 
+取得した情報はリンクモジュールを経て, 管理サーバの情報管理モジュールへと送信される. 
+
+ 
+\vspace{8mm}
+\noindent
+\textbf{情報取得モジュール}
+
+\indent
+情報取得モジュールの機能を以下に述べる
+
+\begin{itemize}
+\item 中継サーバの負荷測定 \\
+　中継サーバが受信ノードに映像・音声配信を行うにあたり, 
+中継サーバの計算機資源に対する負荷が増大すると受信ノードへの映像・音声配信に影響がでると考えられる. 
+そのため, 配信する中継サーバにかかる負荷数をOSの提供する値に基づいて測定を行う. 
+
+\item 中継サーバの配信数 \\
+　中継サーバ一台あたりの配信可能な受信ノードの台数には限界がある. 
+また, 配信を行うfps数で使用帯域が計測できると考えられる. 
+そのため, 中継サーバの配信台数をアプリケーションの提供する値から実使用帯域を測定する. 
+
+\item 受信ノードのコンテンツ品質の状態測定 \\
+　映像・音声配信を行うにあたり, 受信ノードの受信している映像・音声の状態を理解しておく必要がある. 
+そのため, 受信ノード側で映像・音声の品質の状態をアプリケーションの提供する値から取得する.
+
+\end{itemize}
+
+\subsection{情報管理モジュール}
+\label{architecture:control:control}
+\indent
+情報管理モジュールでは, 情報取得モジュールより送られてきた中継サーバ及び受信ノード情報の管理を行う. 
+情報管理モジュールは管理サーバにおいて使用される. 
+また, 受信ノードの生存確認が不可能になった受信ノードのデータの削除, ノード情報の更新, 中継サーバの
+配信先の変更, 配信の停止, 配信の開始, 中継サーバが予期せぬ停止をした際の他の中継サーバへ受信ノード
+の割り振りを行う. 
+
+\vspace{8mm}
+\noindent
+\textbf{情報管理モジュール}
+
+\indent
+情報管理モジュールの機能を以下の述べる
+
+\begin{itemize}
+\item 受信ノードの追加・削除・更新 \\
+　リンク情報モジュールを経由して配信に参加する受信ノードの情報を取得し, 
+データをモジュール内のデータベースに追加後, リンク情報モジュールを経由し, 中継サーバからの配信を開始させる. 
+また, 受信ノードの生存が確認不可能になった受信ノードのデータを削除, 中継サーバからの配信を停止させる. 
+ノード情報が変更された受信ノードのデータの変更を行う. 
+
+\item 最適な中継サーバの選択(中継サーバ側) \\
+　映像・音声配信を行うにあたり, 状況がリアルタイムで変化する中継サーバの負荷データを情報取得モジュールから
+リンク情報モジュールを経由し, 取得・管理を行う. 情報管理モジュールは受信ノード情報の参照を行い, 
+中継サーバの現在配信台数及び中継サーバの計算機資源に対する負荷状況を比較する. 
+比較した情報を元に受信ノードに配信を行う中継サーバを決定, リンク情報モジュールを経て中継サーバに命令する.  
+
+\item 最適な中継サーバの選択(受信ノード側) \\
+　映像・音声配信を受信するにあたり,  受信ノードの受けている映像・音声が通信路や中継サーバの性能によっては
+パケットロスによる品質の低下が起こる可能性がある. そのため, 受信側で発生しているパケットロスを情報取得モジュールから
+リンク情報モジュールを経由し, 取得・管理を行う. 情報管理モジュールは取得した情報と中継サーバの情報を参照, 比較を行う. 
+比較した情報を元に必要に応じて配信を行う中継サーバの変更を決定. リンク情報モジュールを経て中継サーバに命令する. 
+
+\item 映像配信機構の制御命令の送信 \\ 
+　配信を行う中継サーバを決定後, 中継サーバの映像配信機構制御モジュールに配信先のの受信ノードのデータを送信する. 
+配信先受信ノードの情報には受信ノードのIPアドレスを含む. 
+\end{itemize}
+
+
+\subsection{リンク情報モジュール}
+\label{architecture:control:links}
+\indent
+リンク情報モジュールでは, 情報取得モジュールを用いて測定された中継サーバ・受信ノードの情報を管理サーバの
+情報管理モジュールへ送信する. また, 中継サーバ, 受信ノードの生存確認を行う. さらに, 情報管理モジュールが
+送信した映像配信機構の制御命令を中継サーバの映像配信機構モジュールに伝達する. 
+
+\vspace{8mm}
+\noindent
+\textbf{リンク情報モジュール}
+
+\indent
+リンク情報モジュールの機能を以下に述べる. 
+
+\begin{itemize}
+\item 中継サーバ・受信ノード情報の送受信 \\
+　中継サーバ・受信ノード情報の送受信は全て通信を行うそれぞれのリンク情報モジュールを経由して行われる. 
+情報取得モジュールが提供するデータを管理サーバの情報管理モジュールに送信する.
+
+\item 中継サーバ・受信ノードの生存確認 \\
+　配信に参加している中継サーバ・受信ノードはTCPによるコネクションを管理サーバ間とで張っておくことで生存確認を行う. 
+コネクションが切れた時点で生存確認不能と判断し, 受信ノードの場合は配信停止命令を中継サーバに送信する.
+中継サーバの場合は情報管理モジュール内のデータベース参照後, 生存確認不可能になった中継サーバより配信を
+受けていた受信ノードへは, 生存確認がされている他の中継サーバから配信を開始させる. 
+
+\item 制御命令の伝達 \\
+　管理サーバの情報管理モジュールが送信した映像配信機構の制御命令を映像配信制御モジュールに伝達する.  
+
+\end{itemize} 
+
+
+\subsection{映像配信制御モジュール}
+\label{architecture:control:tscontrol}
+\indent
+映像配信制御モジュールでは, 情報管理モジュールが送信してきた制御命令をリンク情報モジュールを経由して受信する. 
+受信した制御命令に従い映像配信機構の制御を行う.本モジュールが制御を行う. 
+
+\vspace{8mm}
+\noindent
+\textbf{映像配信制御モジュールの機能}
+
+\indent
+映像配信制御モジュールの機能を以下に述べる. 
+
+\begin{itemize}
+\item 映像配信機構の制御 \\
+　管理サーバの情報管理モジュールが送信した制御命令を, リンク情報モジュールを経由して受信する. 
+これに基づいて外部の映像配信機構に対して送受信などの制御を行う. これは映像配信制御機構・
+映像配信機構双方が処理可能である汎用的なデータ形式で制御データの伝達を行う. 
+
+\end{itemize}
+
+\section{映像配信機構の機能}
+\label{architecture:transport}
+\indent
+本研究の対象とする配信形態は,
+
+\noindent 
+本機構における映像配信機構には以下の要求事項がある. 
+
+\begin{itemize}
+\item IPマルチキャスト配信をユニキャストに変更して再配信
+\item 配信データの複製による再配信
+\end{itemize}
+
+
+\subsection{IPマルチキャストをユニキャストに変更}
+\label{architecture:transport:uni}
+\indent
+本機構では送信ノードは複数の中継サーバに対し同一のストリームを配信する必要がある. 
+
+
+
+
+
+
+\subsection{配信データの複製}
+\label{architecture:transport:data}
+\indent
+本機構では中継サーバから受信ノードへの映像・音声配信はUnicastを用いて行う. 
+このため, 中継サーバでは配信データの複製をおこない, 再配信を行う. 
+再配信を行う際, 中継サーバは図\ref{fig:1stream}のように最低1本の複製したストリームを出力する. 
+また, 受信ノードが複数存在する場合は図\ref{fig:nstream}のように多数のストリームを出力することで, 
+受信ノードに映像・音声配信を行う. 
+
+\begin{figure}[h]
+\begin{center}
+\begin{minipage}{0.4\textwidth}
+\begin{center}
+\includegraphics[width=170pt]{figure/1stream.eps}
+\end{center}
+\caption{1 : 1のストリームの複製}
+\label{fig:1stream}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\begin{center}
+\includegraphics[width=170pt]{figure/nstream.eps}
+\end{center}
+\caption{1 : nのストリームの複製}
+\label{fig:nstream}
+\end{minipage}
+\end{center}
+\end{figure}

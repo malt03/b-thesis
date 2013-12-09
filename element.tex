@@ -1,0 +1,74 @@
+\chapter{要素技術}
+\label{element}
+\section{量子鍵配送}
+量子鍵配送は，量子情報によって実現される新しい秘密乱数共有
+アルゴリズムである．量子鍵配送の特徴は，量子の観測するまで
+状態が確定せずなおかつ観測すると必ず状態が一意に確定する
+性質に依り，第三者に因る盗聴を確実に検知できる点である．
+\\
+\indent
+量子鍵配送は既に実現されており，今現在実装されている量子鍵配送装置は
+全て量子状態伝達素子に光子を用い，光ファイバーの中を通して通信
+を行うものである．光子の量子状態を変更しないために，この光
+ファイバーにはアンプを入れる事はできない．また，既存のネット
+ワーク機器を入れる事も出来ず，量子鍵配送のルーティングのため
+には専用の量子ネットワークを構成する必要がある．
+\\
+\indent
+2009年12月現在NTT Communications
+に因る20km間10Mb/sが最速である．
+
+\section{IPsec}
+IPsecは，OSI7階層中第3層ネットワーク層で通信を暗号化する
+暗号化プロトコルである．IPsecは通信に秘匿性，完全性，認証を
+与えることが可能である．IPsecによって作られた暗号化通信路は
+Security Association(SA)と呼ばれるパラメータの集合によって
+認識される．SAには暗号化鍵の他に，暗号化プロトコルや
+SAのライフタイムなどのパラメータを持っている．
+
+IPsecの運用形態はトンネルモードと
+トランスポートモードの二種類があり，トンネルモードは拠点間
+における暗号化通信に，トランスポートモードは拠点ネットワーク
+と単体間における暗号化通信に利用される．
+
+
+\section{Internet Key Exchange}
+Internet Key Exchange(IKE)は，IPsecをマネジメントするため
+のプロトコルである．IKEの主な役割は以下の二つである．
+\begin{itemize}
+\item 暗号化鍵の共有
+\item 鍵の使い方の調整
+\end{itemize}
+IKEは暗号化鍵の共有にDiffie-Hellman鍵共有アルゴリズムを用いる．
+IKEはIPsecを行うために二種類のSAを管理する．
+一つはCHILD\_SAと呼ばれるSAで，このSAを用いて実際にやり取りしたい
+データの暗号化通信を行う．もう一つはIKE\_SAと呼ばれるSAで，
+IKE\_SAは新しいSAの折衝やIKEの状態管理を行うためのSAである．
+\\
+\indent
+IKEは図\ref{ike_modules}のような動作シーケンスから成る．
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=400pt]{figure/nullpo.jpg}
+\caption{IKE動作シーケンス図}
+\label{ike_modules}
+\end{center}
+\end{figure}
+\\
+\indent
+
+
+\section{Diffie-Hellman鍵共有アルゴリズム}
+Diffie-Hellman鍵共有アルゴリズムは，素因数分解には効率的な
+アルゴリズムが見つかっていない事に基づく，離れた二者間で共有
+秘密鍵を共有するためのアルゴリズムである．
+Diffie-Hellman鍵共有アルゴリズムは，図\ref{DHequation}にある計算式
+で秘密鍵を計算する．
+
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=400pt]{figure/nullpo.jpg}
+\caption{Diffie-Hellman鍵共有アルゴリズム計算式}
+\label{DHequation}
+\end{center}
+\end{figure}

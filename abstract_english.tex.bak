@@ -1,0 +1,35 @@
+	Abstract of Bachelor's Thesis
+
+\begin{flushright}
+Academic Year 2008
+\end{flushright}
+
+\begin{center}
+\begin{Large}
+\begin{tabular}{|c|} \hline
+Designing and Implementation of \\
+IP Multicast Dvrelay Appropriate to communications quality
+\hline
+\end{tabular}
+\end{Large}
+\end{center}
+%~ \bigskip ~ \\
+%~ \bigskip ~ \\
+\indent
+In this research, adaptive streaming regarding reciever feedback and server load is proposed 
+and realized. The intermediate server in the network path translates realtime IP multicast DV stream into an unicast stream. By using this system, large scale and variable quality video streaming with low loss can be realized. This system does not require difficult configuration at the reciever application.
+Therefore, high quality data with low loss can be distributed to many recievers, and will enhance active information propagation/retrieve.
+
+%~ \bigskip ~ \\
+Keywords : \\
+\underline{1. STREAMING}, \underline{2. adaptive communication},
+\underline{3. IP Multicast}\\
+%\underline{4. }, \underline{5. }\\
+
+\begin{flushright}
+Keio University, Faculty of Environmental Information\\
+~ \\
+\begin{Large}
+Gen Mineki
+\end{Large}
+\end{flushright}

@@ -1,0 +1,53 @@
+\begin{titlepage}
+
+\begin{center}
+\begin{Large}
+卒業論文 ~~~~~ 2008年度 (平成20年度)
+\end{Large}
+\end{center}
+
+\begin{center}
+~ \bigskip ~ \\
+\begin{LARGE}
+\begin{tabular}{|c|}\hline
+通信品質適応型\\
+IPマルチキャストDVリレーの設計と実装
+\\ \hline
+\end{tabular}
+\end{LARGE}
+\\
+~ \bigskip ~ \\
+~ \bigskip ~ \\
+~ \bigskip ~ \\
+~ \bigskip ~ \\
+~ \bigskip ~ \\
+~ \bigskip ~ \\
+
+\begin{Large}
+\medskip
+慶應義塾大学 環境情報学部\\
+\medskip
+氏名：\underline{峯木 厳}\\
+\medskip
+\medskip
+指導教員\\
+慶應義塾大学 環境情報学部\\
+村井 純\\
+徳田 英幸\\
+楠本 博之\\
+中村 修\\
+高汐 一紀\\
+重近 範行\\
+Rodney D. Van Meter III\\
+植原 啓介\\
+三次 仁\\
+中澤 仁\\
+\medskip
+%{\today}
+平成21 年1 月29 日\\
+\medskip
+\end{Large}
+\end{center}
+
+
+\end{titlepage}

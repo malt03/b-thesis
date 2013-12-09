@@ -1,0 +1,30 @@
+Implementation of Network Streaming Session Management and Control
+System in Distributed Environment.
+
+We developed unified media streaming session management and control system in
+diversing AV device, video format and processing.
+
+Media streaming over the Internet by end users for various purposes are
+now pupular, because of popularization of degital video devices and
+broadband detalink.
+Informationg sharing method and application dependent format are the
+problems for Media streaming between end users.
+In contents creation and delivery system, many devices and application
+are combined.
+In this environment, cotroling a information which is required for media
+streaming and unified control method is required.
+
+In this research, we provided following functional capability
+negotiating as media streaming information via internet.
+- automatic management server search.
+- visiualization managed session information
+- unified control interface based on gathered streaming information.
+
+We set management server per broadcast domain to detect automatically
+by end nodes, and management servers share these end nodes' information
+using Any Source.
+
+In streaming system, session was binding on streaming elements and its
+application. This system realized unified and autonomous session
+management.
+We also proposed one of global domain service location system.

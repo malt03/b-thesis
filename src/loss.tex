@@ -1,0 +1,16 @@
+\begin{verbatim}
+
+ dvrecv_param->pkt_loss += rtphdr->seq - rtp_seq_prev - 1;
+ dvrecv_param->pkt_loss_sum += rtphdr->seq - rtp_seq_prev - 1;
+
+  (abbreviation)
+
+ if(rtphdr->seq - rtp_seq_prev - 1 != 0){
+    printf("pkt_loss : %d\n", rtphdr->seq - rtp_seq_prev - 1);
+ }
+
+  (abbreviation)
+
+ rtp_seq_prev = rtphdr->seq;
+
+\end{verbatim}
